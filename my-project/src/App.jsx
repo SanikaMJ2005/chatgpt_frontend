@@ -6,7 +6,7 @@ import Contact from './pages/Contact'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Login from './pages/Login'
-import Signup from './pages/Signup'
+import Singnup from './pages/Singnup'
 
 function App() {
   return (
@@ -18,7 +18,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/singnup" element={<Singnup />} />
       </Routes>
       <Footer />
     </Router>
