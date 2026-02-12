@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import './App.css'
 import Home from './pages/Home'
 import About from './pages/About'
@@ -9,13 +9,32 @@ import Login from './pages/Login'
 import Singnup from './pages/Singnup'
 import Dashboard from './pages/Dashboard'
 
+// This helper component handles the logic of showing/hiding Header & Footer
+const LayoutWrapper = ({ children }) => {
+  const location = useLocation();
+  // Hide header/footer on dashboard because the dashboard has its own sidebar
+  const isDashboard = location.pathname === '/dashboard';
+
+  return (
+    <>
+      {!isDashboard && <Header />}
+      
+      <div 
+        className={!isDashboard ? "main-content" : ""} 
+        style={!isDashboard ? { minHeight: '80vh', paddingTop: '20px' } : {}}
+      >
+        {children}
+      </div>
+
+      {!isDashboard && <Footer />}
+    </>
+  );
+};
+
 function App() {
   return (
     <Router>
-      <Header />
-
-      {/* This wrapper ensures content is visible and doesn't hide behind a fixed header */}
-      <div className="main-content" style={{ minHeight: '80vh', paddingTop: '20px' }}>
+      <LayoutWrapper>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -24,16 +43,14 @@ function App() {
           {/* Login Route */}
           <Route path="/login" element={<Login />} />
           
-          {/* Singnup Routes - handling both spellings so you never get a blank page */}
+          {/* Signup Routes */}
           <Route path="/singnup" element={<Singnup />} />
           <Route path="/signup" element={<Singnup />} />
 
           {/* Dashboard Route */}
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
-      </div>
-
-      <Footer />
+      </LayoutWrapper>
     </Router>
   )
 }
