@@ -1,144 +1,153 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({ 
+        email: '', 
+        password: '' 
+    });
+    const [message, setMessage] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+    const handleChange = (e) => {
+        setFormData({ 
+            ...formData, 
+            [e.target.name]: e.target.value 
+        });
+    };
 
-    try {
-      const response = await fetch('http://127.0.0.1:8000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    const handleLoginSubmit = async (e) => {
+        e.preventDefault();
+        setMessage("Logging in...");
+        try {
+            const response = await fetch('http://127.0.0.1:8000/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
 
-      const data = await response.json();
+            const data = await response.json();
 
-      if (response.ok) {
-        // Store tokens in local storage
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
-        localStorage.setItem('token_type', data.token_type);
+            if (response.ok) {
+                setMessage("Login successful!");
+                // Store the JWT token
+                localStorage.setItem("token", data.access_token);
+                // Redirect to dashboard after a short delay
+                setTimeout(() => navigate('/dashboard'), 1500); 
+            } else {
+                setMessage(data.detail || "Invalid email or password");
+            }
+        } catch (error) {
+            setMessage("Error connecting to server.");
+        }
+    };
 
-        console.log('Login successful! Tokens stored.');
-        // Redirect the user, e.g., window.location.href = '/dashboard';
-      } else {
-        // Handle backend errors (e.g., "Invalid credentials")
-        setError(data.detail || 'Login failed. Please check your credentials.');
-      }
-    } catch (err) {
-      setError('Could not connect to the server.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="mx-auto h-12 w-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-          <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-        </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to your account
-        </h2>
-      </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl border border-gray-100 sm:rounded-2xl sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm text-center">
-                {error}
-              </div>
-            )}
+    return (
+        <div style={styles.container}>
+            <div style={styles.iconContainer}>
+                <div style={styles.icon}>🔒</div>
+            </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email address</label>
-              <div className="mt-1">
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="you@example.com"
-                />
-              </div>
-            </div>
+            <h2 style={styles.title}>Sign in to your account</h2>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <div className="mt-1">
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
+            <div style={styles.card}>
+                <form onSubmit={handleLoginSubmit} style={styles.form}>
+                    <div style={styles.inputGroup}>
+                        <label style={styles.label}>Email address</label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            placeholder="you@example.com" 
+                            value={formData.email} 
+                            onChange={handleChange} 
+                            style={styles.input}
+                            required 
+                        />
+                    </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input type="checkbox" className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
-                <label className="ml-2 block text-sm text-gray-900">Remember me</label>
-              </div>
-              <div className="text-sm">
-                <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">Forgot password?</a>
-              </div>
-            </div>
+                    <div style={styles.inputGroup}>
+                        <label style={styles.label}>Password</label>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            placeholder="••••••••" 
+                            value={formData.password} 
+                            onChange={handleChange} 
+                            style={styles.input}
+                            required 
+                        />
+                    </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white transition duration-150 ${
-                loading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-              }`}
-            >
-              {loading ? 'Authenticating...' : 'Sign in'}
-            </button>
-          </form>
+                    <button type="submit" style={styles.button}>Login</button>
+                </form>
 
-          {/* Social login section remains same... */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300"></div></div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
-            </div>
+                {message && <p style={styles.statusMessage}>{message}</p>}
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition">
-                <span>Google</span>
-              </button>
-              <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition">
-                <span>GitHub</span>
-              </button>
+                <div style={styles.footerText}>
+                    Not a member? <a href="/singnup" style={styles.link}>Singn up here</a>
+                </div>
             </div>
-          </div>
         </div>
-        
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Not a member?{' '}
-          <a href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">Start a 14-day free trial</a>
-        </p>
-      </div>
-    </div>
-  );
+    );
+};
+
+const styles = {
+    container: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '85vh',
+        backgroundColor: '#f9fafb',
+        padding: '20px'
+    },
+    iconContainer: {
+        marginBottom: '15px',
+        backgroundColor: '#6366f1',
+        padding: '10px',
+        borderRadius: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    icon: { fontSize: '24px', color: 'white' },
+    title: {
+        fontSize: '28px',
+        fontWeight: 'bold',
+        color: '#111827',
+        marginBottom: '30px'
+    },
+    card: {
+        backgroundColor: 'white',
+        padding: '40px',
+        borderRadius: '12px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        width: '100%',
+        maxWidth: '400px',
+    },
+    form: { display: 'flex', flexDirection: 'column', gap: '20px' },
+    inputGroup: { display: 'flex', flexDirection: 'column', gap: '5px' },
+    label: { fontSize: '14px', fontWeight: '500', color: '#374151', textAlign: 'left' },
+    input: {
+        padding: '12px',
+        borderRadius: '6px',
+        border: '1px solid #d1d5db',
+        fontSize: '16px',
+        outline: 'none',
+    },
+    button: {
+        padding: '12px',
+        backgroundColor: '#6366f1',
+        color: 'white',
+        border: 'none',
+        borderRadius: '6px',
+        fontSize: '16px',
+        fontWeight: '600',
+        cursor: 'pointer',
+    },
+    statusMessage: { textAlign: 'center', marginTop: '15px', color: '#4f46e5', fontSize: '14px' },
+    footerText: { textAlign: 'center', marginTop: '20px', fontSize: '14px', color: '#6b7280' },
+    link: { color: '#4f46e5', textDecoration: 'none', fontWeight: '500' }
 };
 
 export default Login;
