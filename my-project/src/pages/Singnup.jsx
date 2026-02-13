@@ -10,9 +10,9 @@ const Singnup = () => {
 
     // 2. This function updates the state when you type
     const handleChange = (e) => {
-        setFormData({ 
-            ...formData, 
-            [e.target.name]: e.target.value 
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
         });
     };
 
@@ -20,7 +20,7 @@ const Singnup = () => {
         e.preventDefault();
         setMessage("Processing singnup...");
         try {
-            const response = await fetch('http://127.0.0.1:8000/singnup', {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE}/singnup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
@@ -38,34 +38,34 @@ const Singnup = () => {
             <div style={styles.iconContainer}>
                 <div style={styles.icon}>🔓</div>
             </div>
-            
+
             <h2 style={styles.title}>Singn up for your account</h2>
 
             <div style={styles.card}>
                 <form onSubmit={handleSingnupSubmit} style={styles.form}>
                     <div style={styles.inputGroup}>
                         <label style={styles.label}>Email address</label>
-                        <input 
-                            type="email" 
-                            name="email" 
-                            placeholder="you@example.com" 
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="you@example.com"
                             value={formData.email} // CRITICAL: This allows typing
-                            onChange={handleChange} 
+                            onChange={handleChange}
                             style={styles.input}
-                            required 
+                            required
                         />
                     </div>
 
                     <div style={styles.inputGroup}>
                         <label style={styles.label}>Password</label>
-                        <input 
-                            type="password" 
-                            name="password" 
-                            placeholder="••••••••" 
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="••••••••"
                             value={formData.password} // CRITICAL: This allows typing
-                            onChange={handleChange} 
+                            onChange={handleChange}
                             style={styles.input}
-                            required 
+                            required
                         />
                     </div>
 
